@@ -17,7 +17,8 @@ namespace Microsoft.AspNetCore.Blazor.Build
             app.HelpOption("-?|-h|--help");
             
             app.Command("build", BuildCommand.Command);
-            app.Command("buildrazor", BuildRazorCommand.Command);
+            app.Command("generate-declaration", GenerateDeclarationCommand.Command);
+            app.Command("generate-definition", GenerateDefinitionCommand.Command);
 
             if (args.Length > 0)
             {
