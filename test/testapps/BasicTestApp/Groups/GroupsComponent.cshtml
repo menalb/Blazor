@@ -1,0 +1,68 @@
+@using System.Net
+@using System.Net.Http
+@using System.Collections.Generic;
+
+@inject BasicTestApp.Groups.IQueryGateway<Group> groupsQuery
+
+<style type="text/css">
+
+</style>
+
+<h1>Groups</h1>
+
+<button id="send-request" @onclick(DoRequest)>Load Data</button>
+
+<label id="message">@userMessage</label>
+
+@if (responseStatusCode.HasValue)
+{
+    <h2>Response</h2>
+    <p><div>Status:</div><span id="response-status">@responseStatusCode</span></p>
+    <p><div>Body:</div><textarea id="response-body" readonly>@responseBody</textarea></p>
+}
+ <section class="teaser-container">
+    <div class="col-sm-offset-1">
+                    
+@foreach(var group in groups)
+{
+    <c:GroupComponent group =@group />
+}
+
+   </div>
+</section>
+
+@functions {
+    
+    HttpStatusCode? responseStatusCode;
+    string responseBody;
+    string userMessage;
+    
+    IEnumerable<Group> groups = new List<Group>();
+    GroupsViewModel groupsResponse = new GroupsViewModel();
+
+
+    async void DoRequest()
+    {
+        userMessage ="Loading data ...";
+        responseStatusCode = null;
+
+        try
+        {
+            groups= await groupsQuery.GetAll();
+        }
+
+        catch (Exception ex)
+        {
+            if (ex is AggregateException)
+            {
+                ex = ex.InnerException;
+            }
+            responseStatusCode = HttpStatusCode.SeeOther;
+            responseBody = ex.Message + Environment.NewLine + ex.StackTrace;
+        }
+
+        userMessage = string.Empty;
+
+        StateHasChanged();
+    }
+}

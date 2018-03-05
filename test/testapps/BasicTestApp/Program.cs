@@ -3,8 +3,15 @@
 
 using Microsoft.AspNetCore.Blazor.Browser.Interop;
 using Microsoft.AspNetCore.Blazor.Browser.Rendering;
+using Microsoft.AspNetCore.Blazor.Browser.Services;
+using Microsoft.AspNetCore.Blazor.Browser.Services.Temporary;
 using Microsoft.AspNetCore.Blazor.Components;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using BasicTestApp.Groups;
 
 namespace BasicTestApp
 {
@@ -19,7 +26,20 @@ namespace BasicTestApp
         public static void MountTestComponent(string componentTypeName)
         {
             var componentType = Type.GetType(componentTypeName);
-            new BrowserRenderer().AddComponent(componentType, "app");
+            
+            var browserServiceProvider = new BrowserServiceProvider(
+                services =>
+                {
+                    services.AddSingleton<IQueryGateway<Group>, Groups.GroupsQuery>();
+                    services.AddSingleton(new GatewaysConfiguration());
+                });
+
+            new BrowserRenderer(browserServiceProvider).AddComponent(componentType, "app");
         }
+    }
+
+     public class GatewaysConfiguration
+    {
+        public string GroupsBaseUrl { get { return "api url"; } }
     }
 }
